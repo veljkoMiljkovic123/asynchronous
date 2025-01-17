@@ -86,19 +86,19 @@ getCountryAndNeighbour('argentina');
     });
 }; */
 
-const getJSon = function (url, errorMSG = 'Something went wrong') {
-  return fetch(url)
-    .then(response => {
-      console.log(response);
+// const getJSon = function (url, errorMSG = 'Something went wrong') {
+//   return fetch(url)
+//     .then(response => {
+//       console.log(response);
 
-      if (!response.ok) {
-        throw new Error(`${errorMSG} ${response.status}`);
-      }
+//       if (!response.ok) {
+//         throw new Error(`${errorMSG} ${response.status}`);
+//       }
 
-      return response.json();
-    })
-    .then();
-};
+//       return response.json();
+//     })
+//     .then();
+// };
 
 // const getCountryData = function (country) {
 //   //country 1
@@ -138,33 +138,59 @@ const getJSon = function (url, errorMSG = 'Something went wrong') {
 //     });
 // };
 
-const getCountryData = function (country) {
-  //country 1
-  getJSon(`https://restcountries.com/v2/name/${country}`, 'Country not found')
+// const getCountryData = function (country) {
+//   //country 1
+//   getJSon(`https://restcountries.com/v2/name/${country}`, 'Country not found')
+//     .then(data => {
+//       renderCountry(data[0]);
+
+//       const neighbour = data[0].borders?.[0];
+//       // const neighbour = 'dsadsd';
+
+//       if (!neighbour) throw new Error(`No neighbour found`);
+
+//       // country 2
+//       return getJSon(
+//         `https://restcountries.com/v2/alpha/${neighbour}`,
+//         'Neigbour is not found'
+//       );
+//     })
+//     .then(data => renderCountry(data, 'neighbour'))
+//     .catch(err => {
+//       console.error(`${err} ---`);
+//       renderError(`Something went wrong -- ${err.message}. Try again!`);
+//     })
+//     .finally(() => {
+//       countriesContainer.style.opacity = 1;
+//     });
+// };
+
+// btn.addEventListener('click', function () {
+//   getCountryData('serbia');
+// });
+
+const whereAmI = function (lat, lng) {
+  fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`
+  )
+    .then(res => {
+      console.log(res);
+      if (!res.ok) throw new Error(`Problem with geocoding ${res.status}`);
+      return res.json();
+    })
     .then(data => {
-      renderCountry(data[0]);
-
-      const neighbour = data[0].borders?.[0];
-      // const neighbour = 'dsadsd';
-
-      if (!neighbour) throw new Error(`No neighbour found`);
-
-      // country 2
-      return getJSon(
-        `https://restcountries.com/v2/alpha/${neighbour}`,
-        'Neigbour is not found'
-      );
+      console.log(data);
+      if (!data.city) throw new Error('City not founded');
+      console.log(`You are in ${data.city}, ${data.countryName}`);
+      return fetch(`https://restcountries.com/v2/name/${data.country}`);
     })
-    .then(data => renderCountry(data, 'neighbour'))
-    .catch(err => {
-      console.error(`${err} ---`);
-      renderError(`Something went wrong -- ${err.message}. Try again!`);
+    .then(response => {
+      if (!response.ok)
+        throw new Error(`Country not found (${response.status})`);
+      return response.json();
     })
-    .finally(() => {
-      countriesContainer.style.opacity = 1;
-    });
+    .then(data => renderCountry(data[0]))
+    .catch(err => console.error(`${err.message}***`));
 };
 
-btn.addEventListener('click', function () {
-  getCountryData('serbia');
-});
+whereAmI(52.508, 13.381);
